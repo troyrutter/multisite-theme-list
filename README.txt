@@ -20,7 +20,7 @@ At the end of the listing a summary is given listing the number of sites active 
 In WordPress:
 
 1. Go to Plugins > Add New > search for `multisite-theme-list`
-1. Press "Install Now" for the AddToAny plugin
+1. Press "Install Now" for the plugin
 1. Press "Activate Plugin"
 
 Manual installation:
