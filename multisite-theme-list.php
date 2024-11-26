@@ -85,7 +85,7 @@ class Multisite_Theme_List {
         echo '<thead><tr>';
          // Display each column header with sorting links and indicators
         echo '<th><a href="' . esc_url(add_query_arg(['sort_by' => 'name', 'order' => $next_order, '_wpnonce' => wp_create_nonce('multisite_sort_nonce')])) . '">Site Name' . ($sort_by === 'name' ? esc_html($indicator) : '') . '</a></th>';
-        echo '<th><a href="' . esc_url(add_query_arg(['sort_by' => 'url', 'order' => $next_order, '_wpnonce' => wp_create_nonce('multisite_sort_nonce')])) . '">Site URL' . ($sort_by === 'url' ? esc_html($indicator) : '') . '</a></th>';
+        echo '<th><a href="' . esc_url(add_query_arg(['sort_by' => 'url', 'order' => $next_order, '_wpnonce' => wp_create_nonce('multisite_sort_nonce')])) . '">Site URL' . ($sort_by === 'url' || $sort_by === 'name' ? esc_html($indicator) : '') . '</a></th>';
         echo '<th><a href="' . esc_url(add_query_arg(['sort_by' => 'theme', 'order' => $next_order, '_wpnonce' => wp_create_nonce('multisite_sort_nonce')])) . '">Active Theme' . ($sort_by === 'theme' ? esc_html($indicator) : '') . '</a></th>';
         echo '</tr></thead>';
         echo '<tbody>';
