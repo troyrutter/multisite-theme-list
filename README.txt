@@ -3,9 +3,10 @@
 Contributors: troyrutter
 Tags: multisite
 Requires at least: 4.5
-Tested up to: 6.6
+Tested up to: 6.7.1
 Requires PHP: 5.6
 Stable tag: 1.0
+License: GPLv2 or later
 
 Display table of multisite sites with wordpress theme and version.
 
