@@ -28,7 +28,6 @@ class Multisite_Theme_List {
         );
     }
 
-
     public function display_multisite_list() {
         if (!is_multisite()) {
             echo '<div class="notice notice-error"><p>This plugin only works on multisite installations.</p></div>';
