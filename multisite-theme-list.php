@@ -4,6 +4,7 @@ Plugin Name: Multisite Theme List
 Description: A plugin to list every subsite in a WordPress multisite, displaying each site's name, URL, active theme, and a summary of theme usage across all sites.
 Version: 1.0
 Author: Troy Rutter
+License: GPLv2 or later
 */
 
 if (!defined('ABSPATH')) {
@@ -14,7 +15,6 @@ class Multisite_Theme_List {
 
     public function __construct() {
         add_action('network_admin_menu', array($this, 'add_admin_menu'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
     }
 
     public function add_admin_menu() {
@@ -28,17 +28,6 @@ class Multisite_Theme_List {
         );
     }
 
-    public function enqueue_scripts() {
-        // Only enqueue on the plugin's page
-        if (isset($_GET['page']) && $_GET['page'] === 'multisite-theme-list') {
-            wp_enqueue_style('datatables-css', 'https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css');
-            wp_enqueue_script('datatables-js', 'https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js', array('jquery'), null, true);
-
-            // Disable pagination
-            wp_add_inline_script('datatables-js', 'jQuery(document).ready(function($) { $("#multisite-theme-table").DataTable({ paging: false }); });');
-   
-        }
-    }
 
     public function display_multisite_list() {
         if (!is_multisite()) {
@@ -46,18 +35,60 @@ class Multisite_Theme_List {
             return;
         }
 
+        // Allow access on the initial load without a nonce
+        if (isset($_GET['sort_by']) || isset($_GET['order'])) {
+
+            // Unslash and sanitize the nonce before verifying
+            $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) : '';
+            if (!wp_verify_nonce($nonce, 'multisite_sort_nonce')) {
+                wp_die(esc_html__('Unauthorized request.', 'multisite-theme-list'));
+            }
+        }
+
+        // Get the current sorting options from query parameters
+        $sort_by = isset($_GET['sort_by']) ? sanitize_text_field(wp_unslash($_GET['sort_by'])) : 'name';
+        $order = isset($_GET['order']) ? sanitize_text_field(wp_unslash($_GET['order'])) : 'asc';
+        $indicator = $order === 'asc' ? ' ↑' : ' ↓';
         $sites = get_sites();
+        
         if (empty($sites)) {
             echo '<div class="notice notice-info"><p>No subsites found.</p></div>';
             return;
         }
+        
+        // Sort sites based on the selected column and order
+        $sites = get_sites();
+        usort($sites, function($a, $b) use ($sort_by, $order) {
+            switch ($sort_by) {
+                case 'url':
+                $result = strcmp(get_site_url($a->blog_id), get_site_url($b->blog_id));
+                break;
+                case 'theme':
+                $theme_a = wp_get_theme($a->blog_id)->get('Name');
+                $theme_b = wp_get_theme($b->blog_id)->get('Name');
+                $result = strcmp($theme_a, $theme_b);
+                break;
+                case 'name':
+                default:
+                $result = strcmp(get_blog_details($a->blog_id)->blogname, get_blog_details($b->blog_id)->blogname);
+            }
+            return $order === 'desc' ? -$result : $result;
+        });
+
+        // Determine the opposite order for the next click
+        $next_order = $order === 'asc' ? 'desc' : 'asc';
 
         $theme_count = []; // Array to store theme usage counts
 
         echo '<div class="wrap">';
         echo '<h1>Multisite Theme List</h1>';
         echo '<table id="multisite-theme-table" class="widefat fixed striped">';
-        echo '<thead><tr><th>Site Name</th><th>Site URL</th><th>Active Theme and Version</th></tr></thead>';
+        echo '<thead><tr>';
+         // Display each column header with sorting links and indicators
+        echo '<th><a href="' . esc_url(add_query_arg(['sort_by' => 'name', 'order' => $next_order, '_wpnonce' => wp_create_nonce('multisite_sort_nonce')])) . '">Site Name' . ($sort_by === 'name' ? esc_html($indicator) : '') . '</a></th>';
+        echo '<th><a href="' . esc_url(add_query_arg(['sort_by' => 'url', 'order' => $next_order, '_wpnonce' => wp_create_nonce('multisite_sort_nonce')])) . '">Site URL' . ($sort_by === 'url' ? esc_html($indicator) : '') . '</a></th>';
+        echo '<th><a href="' . esc_url(add_query_arg(['sort_by' => 'theme', 'order' => $next_order, '_wpnonce' => wp_create_nonce('multisite_sort_nonce')])) . '">Active Theme' . ($sort_by === 'theme' ? esc_html($indicator) : '') . '</a></th>';
+        echo '</tr></thead>';
         echo '<tbody>';
 
         foreach ($sites as $site) {
