@@ -12,7 +12,9 @@ Display table of multisite sites with wordpress theme and version.
 
 == Description ==
 
-This plugin presents a simple table in the Network Admin > Themes section that lists each multisite and what theme/version is currently active. 
+This plugin presents a simple table in the Network Admin > Themes section of the main multisite admin 
+dashboard that lists each multisite and what theme/version is currently active. 
+
 At the end of the listing a summary is given listing the number of sites active for each theme in use.
 
 
