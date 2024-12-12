@@ -1,6 +1,6 @@
 === Multisite Theme List ===
 
-Contributors: troyrutter
+Contributors: trutter
 Tags: multisite
 Requires at least: 4.5
 Tested up to: 6.7.1
